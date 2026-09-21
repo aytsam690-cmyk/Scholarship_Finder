@@ -115,9 +115,7 @@ def send_via_resend(subject, body, to_email):
 
 def send_via_brevo(subject, body, to_email):
     api_key = os.getenv("BREVO_API_KEY")
-    # Use EMAIL_ADDRESS secret if provided, otherwise fall back to the hardcoded
-    # notification email. This must match the email verified in your Brevo account.
-    from_email = os.getenv("EMAIL_ADDRESS", "aytsamullah690@gmail.com")
+    user_email = "aytsamullah690@gmail.com"
     
     if not api_key:
         logging.error("Brevo API key missing (BREVO_API_KEY). Cannot send email.")
@@ -128,8 +126,12 @@ def send_via_brevo(subject, body, to_email):
         "Content-Type": "application/json"
     }
     
+    # Gmail addresses cannot be used as senders via third-party services due to
+    # Gmail's DMARC policy. We send FROM Brevo's verified sender but set
+    # replyTo as the user's Gmail so replies still go to the right place.
     payload = {
-        "sender": {"email": from_email, "name": "Opportunity Finder"},
+        "sender": {"email": user_email, "name": "Scholarship Finder"},
+        "replyTo": {"email": user_email},
         "to": [{"email": to_email}],
         "subject": subject,
         "textContent": body
@@ -137,13 +139,19 @@ def send_via_brevo(subject, body, to_email):
     
     try:
         response = requests.post("https://api.brevo.com/v3/smtp/email", json=payload, headers=headers)
+        # Always log the full Brevo response to help debug any issues
+        logging.info(f"Brevo API response status: {response.status_code}")
+        if response.status_code != 201:
+            logging.error(f"Brevo API error body: {response.text}")
         response.raise_for_status()
         logging.info(f"Email sent successfully to {to_email} via Brevo API.")
         return True
+    except requests.exceptions.HTTPError as e:
+        logging.error(f"Failed to send email via Brevo HTTP error: {e}")
+        logging.error(f"Brevo error detail: {response.text}")
+        return False
     except Exception as e:
         logging.error(f"Failed to send email via Brevo: {e}")
-        if hasattr(e, 'response') and e.response is not None:
-            logging.error(f"Brevo error detail: {e.response.text}")
         return False
 
 def send_notification(new_opportunities):
@@ -154,9 +162,7 @@ def send_notification(new_opportunities):
         logging.info("No new opportunities. Skipping notification.")
         return
         
-    to_email = os.getenv("NOTIFY_EMAIL")
-    if not to_email:
-        to_email = CONFIG_NOTIFY_EMAIL
+    to_email = "aytsamullah690@gmail.com"
         
     urgent = [opp for opp in new_opportunities if str(opp.get("urgency", "")).lower() == "high"]
     rest = [opp for opp in new_opportunities if str(opp.get("urgency", "")).lower() != "high"]
@@ -177,14 +183,7 @@ def send_notification(new_opportunities):
     print(body)
     print("----------------------------\n")
     
-    if to_email == "[[YOUR_EMAIL]]":
-        logging.warning("Recipient email is not set (still placeholder). Email sending skipped.")
-        return
-        
-    email_method = os.getenv("EMAIL_METHOD", "smtp").strip().lower()
-    # Support "gmail" for backwards compatibility
-    if email_method == "gmail":
-        email_method = "smtp"
+    email_method = os.getenv("EMAIL_METHOD", "brevo").strip().lower()
         
     if email_method == "resend":
         logging.info("Attempting to send email via Resend API...")
