@@ -23,8 +23,8 @@ def evaluate_candidate(candidate):
         return None
 
     try:
-        # Default to standard model
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # gemini-2.0-flash is the current fast free-tier model
+        model = genai.GenerativeModel('gemini-2.0-flash')
     except Exception as e:
         logging.error(f"Failed to initialize Gemini model: {e}")
         return None
