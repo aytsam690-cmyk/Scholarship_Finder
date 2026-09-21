@@ -16,8 +16,8 @@ client = None
 if GEMINI_API_KEY:
     client = genai.Client(api_key=GEMINI_API_KEY)
 
-# gemini-2.0-flash: free tier = 15 RPM, 1500 RPD (much better than gemini-3.6-flash's 20 RPD)
-MODEL = "gemini-2.0-flash"
+# gemini-2.5-flash: free tier with strong reasoning capability
+MODEL = "gemini-2.5-flash"
 
 def evaluate_candidate(candidate):
     """
