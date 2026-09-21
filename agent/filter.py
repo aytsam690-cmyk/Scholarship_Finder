@@ -16,8 +16,8 @@ client = None
 if GEMINI_API_KEY:
     client = genai.Client(api_key=GEMINI_API_KEY)
 
-# gemini-2.5-flash: free tier with strong reasoning capability
-MODEL = "gemini-2.5-flash"
+# gemini-2.5-flash-lite: lightweight, fast, and free-tier friendly
+MODEL = "gemini-2.5-flash-lite"
 
 def evaluate_candidate(candidate):
     """
@@ -89,7 +89,10 @@ Interpret urgency as:
         response = client.models.generate_content(
             model=MODEL,
             contents=prompt,
-            config=types.GenerateContentConfig(temperature=0.0)
+            config=types.GenerateContentConfig(
+                temperature=0.0,
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
+            )
         )
 
         response_text = response.text.strip()
