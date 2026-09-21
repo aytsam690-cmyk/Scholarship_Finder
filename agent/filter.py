@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import time
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -121,12 +122,26 @@ def filter_candidates(candidates):
     """
     Takes a list of raw candidates, evaluates each with the LLM, 
     and returns a list of enriched candidates that are both relevant and eligible.
+    Free tier limit: 5 requests/min for gemini-3.6-flash, so we wait 13s between calls.
     """
     filtered = []
     
     for i, candidate in enumerate(candidates, 1):
         logging.info(f"Evaluating candidate {i}/{len(candidates)}: {candidate.get('title', 'Unknown')}")
-        evaluation = evaluate_candidate(candidate)
+        
+        # Rate limit: free tier allows 5 req/min. Wait 13s between calls to stay safe.
+        if i > 1:
+            logging.info("  Rate limit pause (13s)...")
+            time.sleep(13)
+        
+        # Retry up to 3 times on 429 quota errors
+        evaluation = None
+        for attempt in range(3):
+            evaluation = evaluate_candidate(candidate)
+            if evaluation is not None:
+                break
+            logging.warning(f"  Attempt {attempt+1} failed. Waiting 60s before retry...")
+            time.sleep(60)
         
         if not evaluation:
             continue
