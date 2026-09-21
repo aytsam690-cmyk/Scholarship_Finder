@@ -23,8 +23,8 @@ def evaluate_candidate(candidate):
         return None
 
     try:
-        # gemini-2.0-flash is the current fast free-tier model
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        # gemini-3.6-flash is the current recommended fast free-tier model
+        model = genai.GenerativeModel('gemini-3.6-flash')
     except Exception as e:
         logging.error(f"Failed to initialize Gemini model: {e}")
         return None
