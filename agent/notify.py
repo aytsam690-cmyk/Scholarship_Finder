@@ -115,7 +115,9 @@ def send_via_resend(subject, body, to_email):
 
 def send_via_brevo(subject, body, to_email):
     api_key = os.getenv("BREVO_API_KEY")
-    from_email = os.getenv("EMAIL_ADDRESS", "no-reply@opportunity-finder.local")
+    # Default to the user's notification email if EMAIL_ADDRESS isn't explicitly set, 
+    # since Brevo usually requires the sender email to be the one you registered with.
+    from_email = os.getenv("EMAIL_ADDRESS", CONFIG_NOTIFY_EMAIL)
     
     if not api_key:
         logging.error("Brevo API key missing (BREVO_API_KEY). Cannot send email.")
