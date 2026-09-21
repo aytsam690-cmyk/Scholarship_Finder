@@ -2,38 +2,36 @@ import os
 import json
 import logging
 import time
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 from agent.config import PROFILE
 
 load_dotenv()
 
-# Configure the LLM API (Google Generative AI / Gemini)
+# Configure the new google-genai client
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+client = None
 if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+    client = genai.Client(api_key=GEMINI_API_KEY)
+
+# gemini-2.0-flash: free tier = 15 RPM, 1500 RPD (much better than gemini-3.6-flash's 20 RPD)
+MODEL = "gemini-2.0-flash"
 
 def evaluate_candidate(candidate):
     """
     Sends the candidate information to the LLM to evaluate relevance and eligibility.
     Returns a dictionary with parsed JSON fields or None if evaluation fails.
     """
-    if not GEMINI_API_KEY:
+    if not client:
         logging.error("GEMINI_API_KEY is not set. Cannot evaluate candidate.")
-        return None
-
-    try:
-        # gemini-3.6-flash is the current recommended fast free-tier model
-        model = genai.GenerativeModel('gemini-3.6-flash')
-    except Exception as e:
-        logging.error(f"Failed to initialize Gemini model: {e}")
         return None
 
     title = candidate.get("title", "")
     url = candidate.get("url", "")
     raw_text = candidate.get("raw_text", "")
-    
+
     # Truncate raw text defensively if extremely large
     truncated_text = raw_text[:25000]
 
@@ -88,29 +86,28 @@ Interpret urgency as:
 - unknown = deadline cannot be determined
 """
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                temperature=0.0,
-            )
+        response = client.models.generate_content(
+            model=MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(temperature=0.0)
         )
-        
+
         response_text = response.text.strip()
-        
+
         # Parse defensively: strip markdown fences
         if response_text.startswith("```json"):
             response_text = response_text[7:]
         elif response_text.startswith("```"):
             response_text = response_text[3:]
-            
+
         if response_text.endswith("```"):
             response_text = response_text[:-3]
-            
+
         response_text = response_text.strip()
-        
+
         parsed_data = json.loads(response_text)
         return parsed_data
-        
+
     except json.JSONDecodeError as e:
         logging.warning(f"Malformed JSON from LLM for candidate '{title}': {e}. Response was: {response_text}")
         return None
@@ -120,43 +117,42 @@ Interpret urgency as:
 
 def filter_candidates(candidates):
     """
-    Takes a list of raw candidates, evaluates each with the LLM, 
+    Takes a list of raw candidates, evaluates each with the LLM,
     and returns a list of enriched candidates that are both relevant and eligible.
-    Free tier limit: 5 requests/min for gemini-3.6-flash, so we wait 13s between calls.
+    gemini-2.0-flash free tier: 15 RPM, 1500 RPD. Wait 5s between calls to stay safe.
     """
     filtered = []
-    
+
     for i, candidate in enumerate(candidates, 1):
         logging.info(f"Evaluating candidate {i}/{len(candidates)}: {candidate.get('title', 'Unknown')}")
-        
-        # Rate limit: free tier allows 5 req/min. Wait 13s between calls to stay safe.
+
+        # Small delay to stay within rate limits (15 RPM = 1 per 4s, using 5s to be safe)
         if i > 1:
-            logging.info("  Rate limit pause (13s)...")
-            time.sleep(13)
-        
-        # Retry up to 3 times on 429 quota errors
+            time.sleep(5)
+
+        # Retry up to 3 times on transient errors
         evaluation = None
         for attempt in range(3):
             evaluation = evaluate_candidate(candidate)
             if evaluation is not None:
                 break
-            logging.warning(f"  Attempt {attempt+1} failed. Waiting 60s before retry...")
-            time.sleep(60)
-        
+            logging.warning(f"  Attempt {attempt+1} failed. Waiting 30s before retry...")
+            time.sleep(30)
+
         if not evaluation:
             continue
-            
+
         # Enrich candidate
         enriched_candidate = candidate.copy()
         enriched_candidate.update(evaluation)
-        
+
         is_relevant = evaluation.get("relevant", False)
         is_eligible = evaluation.get("eligible", False)
-        
+
         if is_relevant and is_eligible:
             filtered.append(enriched_candidate)
         else:
             logging.info(f"  Rejected: relevant={is_relevant}, eligible={is_eligible}")
             logging.info(f"  Reasoning: {evaluation.get('reasoning', 'None provided')}")
-            
+
     return filtered
