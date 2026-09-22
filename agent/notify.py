@@ -115,7 +115,7 @@ def send_via_resend(subject, body, to_email):
 
 def send_via_brevo(subject, body, to_email):
     api_key = os.getenv("BREVO_API_KEY")
-    sender_email = "aytsamullah5@gmail.com"
+    sender_email = "aytsamullah690@gmail.com"
     recipient_email = "aytsamullah690@gmail.com"
     
     if not api_key:
