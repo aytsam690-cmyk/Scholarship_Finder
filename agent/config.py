@@ -27,7 +27,7 @@ Candidate Profile:
 - Building AI/ML and software projects
 
 Seeking Opportunities:
-- research internships
+- research internships (HIGHEST PRIORITY — especially funded ones)
 - software engineering internships
 - summer research programs
 - fellowships
@@ -36,6 +36,7 @@ Seeking Opportunities:
 - scholarships related to CS/technology
 - remote research opportunities
 - international undergraduate opportunities
+- fully funded programs (stipend, travel, accommodation)
 - other legitimate opportunities useful for a CS undergraduate
 
 Eligibility Requirements (CRITICAL):
@@ -62,7 +63,9 @@ A strong Software Engineering, Systems, Cybersecurity, Database, Cloud, Open Sou
 """
 
 SOURCES = [
-    # Official Program Pages
+    # =============================================
+    #  FIXED PAGES — Well-known programs
+    # =============================================
     {
         "name": "MLH Fellowship",
         "url": "https://fellowship.mlh.io/",
@@ -93,8 +96,36 @@ SOURCES = [
         "url": "https://www.daad.de/rise/en/rise-germany/",
         "type": "fixed_page"
     },
-    
-    # Broad Search Queries
+    # NEW: Top funded research programs worldwide
+    {
+        "name": "CERN Openlab Summer Student Programme",
+        "url": "https://openlab.cern/education",
+        "type": "fixed_page"
+    },
+    {
+        "name": "ETH Zurich Student Summer Research Fellowship",
+        "url": "https://inf.ethz.ch/studies/summer-research-fellowship.html",
+        "type": "fixed_page"
+    },
+    {
+        "name": "EPFL Summer@EPFL Research Internship",
+        "url": "https://summer.epfl.ch/",
+        "type": "fixed_page"
+    },
+    {
+        "name": "Caltech SURF (Summer Undergraduate Research Fellowships)",
+        "url": "https://sfp.caltech.edu/undergraduate-research/programs/surf",
+        "type": "fixed_page"
+    },
+    {
+        "name": "KAUST Visiting Student Research Program (VSRP)",
+        "url": "https://vsrp.kaust.edu.sa/",
+        "type": "fixed_page"
+    },
+
+    # =============================================
+    #  SEARCH QUERIES — Broad discovery
+    # =============================================
     {
         "name": "computer science undergraduate internship international students 2027",
         "url": "computer science undergraduate internship international students 2027",
@@ -149,7 +180,33 @@ SOURCES = [
         "name": "cloud computing internship undergraduate international students 2027",
         "url": "cloud computing internship undergraduate international students 2027",
         "type": "search_query"
-    }
+    },
+    # NEW: Funded research and global scholarship queries
+    {
+        "name": "funded undergraduate research internship international 2027",
+        "url": "funded undergraduate research internship international 2027",
+        "type": "search_query"
+    },
+    {
+        "name": "fully funded summer research program CS international students 2027",
+        "url": "fully funded summer research program CS international students 2027",
+        "type": "search_query"
+    },
+    {
+        "name": "computer science scholarship undergraduate international 2027",
+        "url": "computer science scholarship undergraduate international 2027",
+        "type": "search_query"
+    },
+    {
+        "name": "STEM fellowship undergraduate international students 2027",
+        "url": "STEM fellowship undergraduate international students 2027",
+        "type": "search_query"
+    },
+    {
+        "name": "paid research internship computer science Europe Asia 2027",
+        "url": "paid research internship computer science Europe Asia 2027",
+        "type": "search_query"
+    },
 ]
 
-NOTIFY_EMAIL = "aytsamullah690@gmail.com"
+NOTIFY_EMAIL = "aytsamullah5@gmail.com"
