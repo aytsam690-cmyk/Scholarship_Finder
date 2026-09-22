@@ -115,11 +115,8 @@ def send_via_resend(subject, body, to_email):
 
 def send_via_brevo(subject, body, to_email):
     api_key = os.getenv("BREVO_API_KEY")
-    # Sender and recipient must be DIFFERENT to avoid Gmail self-send loop detection.
-    # aytsamullah5@gmail.com = sender (must be verified in Brevo)
-    # aytsamullah690@gmail.com = recipient (where email is delivered)
     sender_email = "aytsamullah5@gmail.com"
-    recipient_email = "aytsamullah690@gmail.com"
+    recipient_email = "aytsamullah5@gmail.com"
     
     if not api_key:
         logging.error("Brevo API key missing (BREVO_API_KEY). Cannot send email.")
