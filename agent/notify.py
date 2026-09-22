@@ -115,7 +115,8 @@ def send_via_resend(subject, body, to_email):
 
 def send_via_brevo(subject, body, to_email):
     api_key = os.getenv("BREVO_API_KEY")
-    user_email = "aytsamullah690@gmail.com"
+    sender_email = "aytsamullah5@gmail.com"
+    recipient_email = "aytsamullah690@gmail.com"
     
     if not api_key:
         logging.error("Brevo API key missing (BREVO_API_KEY). Cannot send email.")
@@ -130,9 +131,9 @@ def send_via_brevo(subject, body, to_email):
     # via third-party services. Use Brevo's own shared sending domain instead,
     # and set replyTo to the user's Gmail so replies still work.
     payload = {
-        "sender": {"email": "no-reply@smtp-brevo.com", "name": "Scholarship Finder"},
-        "replyTo": {"email": user_email},
-        "to": [{"email": to_email}],
+        "sender": {"email": sender_email, "name": "Scholarship Finder"},
+        "replyTo": {"email": sender_email},
+        "to": [{"email": recipient_email}],
         "subject": subject,
         "textContent": body
     }
