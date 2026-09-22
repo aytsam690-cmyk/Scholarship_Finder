@@ -16,8 +16,8 @@ client = None
 if GEMINI_API_KEY:
     client = genai.Client(api_key=GEMINI_API_KEY)
 
-# gemini-2.5-flash-lite: lightweight, fast, and free-tier friendly
-MODEL = "gemini-2.5-flash-lite"
+# gemini-3.5-flash-lite: https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite
+MODEL = "gemini-3.5-flash-lite"
 
 def evaluate_candidate(candidate):
     """
