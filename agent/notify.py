@@ -115,7 +115,10 @@ def send_via_resend(subject, body, to_email):
 
 def send_via_brevo(subject, body, to_email):
     api_key = os.getenv("BREVO_API_KEY")
-    sender_email = "aytsamullah690@gmail.com"
+    # Sender and recipient must be DIFFERENT to avoid Gmail self-send loop detection.
+    # aytsamullah5@gmail.com = sender (must be verified in Brevo)
+    # aytsamullah690@gmail.com = recipient (where email is delivered)
+    sender_email = "aytsamullah5@gmail.com"
     recipient_email = "aytsamullah690@gmail.com"
     
     if not api_key:
@@ -127,9 +130,6 @@ def send_via_brevo(subject, body, to_email):
         "Content-Type": "application/json"
     }
     
-    # IMPORTANT: Gmail's DMARC policy (p=reject) blocks sending FROM @gmail.com
-    # via third-party services. Use Brevo's own shared sending domain instead,
-    # and set replyTo to the user's Gmail so replies still work.
     payload = {
         "sender": {"email": sender_email, "name": "Scholarship Finder"},
         "replyTo": {"email": sender_email},
@@ -140,12 +140,10 @@ def send_via_brevo(subject, body, to_email):
     
     try:
         response = requests.post("https://api.brevo.com/v3/smtp/email", json=payload, headers=headers)
-        # Always log the full Brevo response to help debug any issues
         logging.info(f"Brevo API response status: {response.status_code}")
-        if response.status_code != 201:
-            logging.error(f"Brevo API error body: {response.text}")
+        logging.info(f"Brevo API full response: {response.text}")
         response.raise_for_status()
-        logging.info(f"Email sent successfully to {to_email} via Brevo API.")
+        logging.info(f"Email sent successfully to {recipient_email} via Brevo API.")
         return True
     except requests.exceptions.HTTPError as e:
         logging.error(f"Failed to send email via Brevo HTTP error: {e}")
