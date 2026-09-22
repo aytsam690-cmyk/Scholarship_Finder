@@ -122,7 +122,7 @@ def filter_candidates(candidates):
     """
     Takes a list of raw candidates, evaluates each with the LLM,
     and returns a list of enriched candidates that are both relevant and eligible.
-    gemini-2.0-flash free tier: 15 RPM, 1500 RPD. Wait 5s between calls to stay safe.
+    Uses gemini-3.5-flash-lite. Waits 5s between calls to stay within rate limits.
     """
     filtered = []
 
