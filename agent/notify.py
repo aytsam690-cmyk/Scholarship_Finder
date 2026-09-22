@@ -183,7 +183,8 @@ def send_notification(new_opportunities):
     print(body)
     print("----------------------------\n")
     
-    email_method = os.getenv("EMAIL_METHOD", "brevo").strip().lower()
+    # Default to brevo if EMAIL_METHOD is not set or is empty
+    email_method = (os.getenv("EMAIL_METHOD", "") or "brevo").strip().lower()
         
     if email_method == "resend":
         logging.info("Attempting to send email via Resend API...")
