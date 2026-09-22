@@ -126,11 +126,11 @@ def send_via_brevo(subject, body, to_email):
         "Content-Type": "application/json"
     }
     
-    # Gmail addresses cannot be used as senders via third-party services due to
-    # Gmail's DMARC policy. We send FROM Brevo's verified sender but set
-    # replyTo as the user's Gmail so replies still go to the right place.
+    # IMPORTANT: Gmail's DMARC policy (p=reject) blocks sending FROM @gmail.com
+    # via third-party services. Use Brevo's own shared sending domain instead,
+    # and set replyTo to the user's Gmail so replies still work.
     payload = {
-        "sender": {"email": user_email, "name": "Scholarship Finder"},
+        "sender": {"email": "no-reply@smtp-brevo.com", "name": "Scholarship Finder"},
         "replyTo": {"email": user_email},
         "to": [{"email": to_email}],
         "subject": subject,
